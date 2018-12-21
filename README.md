@@ -14,6 +14,40 @@ You will be able to:
 - Measure the impact of PCA on the accuracy of classification algorithms
 - Plot the decision boundary of different classification experiments to visually inspect their performance. 
 
+## Objectives
+YWBAT
+* Describe PCA 
+    * How does PCA work?
+        * Reduces dimensions 
+        * Maintains variance (mostly)
+        * Finds vector u1 that maximizes the variance and square error for the points
+        * It will then find the vector u2, orthogonal to u1.
+        * Repeats until space is at a desired k-dimension.
+    * When is it used?
+        * When we want to reduce dimensions
+        * Processing, perhaps?
+        * Data Visualization
+    * What are the benefits?
+        * Normalizes data before calculating u1 and u2
+        * Maintaining variance as much as possible
+    * What are the drawbacks?
+        * Lose interpretability for features
+        * Curse of dimensionality
+* Perform PCA in Python
+
+# Vocab Words
+* Orthogonal(ity) - the dot product between vectors/planes is 0, the angle between vectors is 90 degrees.
+* Projection - mapping of a vector space onto another
+    * ex: 3 d would project onto 2 d
+* PCA - calculate u1 and u2 (vectors)
+    * u1 and u2 are orthogonal
+* **Linear Combination** - the sum of vectors with some scalar lead coefficient
+    * ex: for two vectors **x1** and **x2** a linear combinations: 
+        * c = k1x1 + k2x2
+
+## Notes
+* Rotation maintains variance in a matrix space
+
 ## Iris Dataset
 
 In this post we'll see how to use Principal Component Analysis to perform linear data reduction for the purpose of data visualization. Let's load the necessary libraries and iris dataset to get us started. 
@@ -26,12 +60,27 @@ Perform following steps:
 
 
 ```python
+import pandas as pd
+import numpy as np
+
+from sklearn.datasets import load_iris
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+
+import matplotlib.pyplot as plt
+```
+
+
+```python
 # Load necessary libraries
-
-
+iris = load_iris()
 # Your code here 
+X = iris.data
+y = iris.target
+columns = iris.feature_names
 
-
+df = pd.DataFrame(X, columns=columns)
+df.head()
 ```
 
 
@@ -55,11 +104,10 @@ Perform following steps:
   <thead>
     <tr style="text-align: right;">
       <th></th>
-      <th>sepal length</th>
-      <th>sepal width</th>
-      <th>petal length</th>
-      <th>petal width</th>
-      <th>target</th>
+      <th>sepal length (cm)</th>
+      <th>sepal width (cm)</th>
+      <th>petal length (cm)</th>
+      <th>petal width (cm)</th>
     </tr>
   </thead>
   <tbody>
@@ -69,7 +117,6 @@ Perform following steps:
       <td>3.5</td>
       <td>1.4</td>
       <td>0.2</td>
-      <td>Iris-setosa</td>
     </tr>
     <tr>
       <th>1</th>
@@ -77,7 +124,6 @@ Perform following steps:
       <td>3.0</td>
       <td>1.4</td>
       <td>0.2</td>
-      <td>Iris-setosa</td>
     </tr>
     <tr>
       <th>2</th>
@@ -85,7 +131,6 @@ Perform following steps:
       <td>3.2</td>
       <td>1.3</td>
       <td>0.2</td>
-      <td>Iris-setosa</td>
     </tr>
     <tr>
       <th>3</th>
@@ -93,7 +138,6 @@ Perform following steps:
       <td>3.1</td>
       <td>1.5</td>
       <td>0.2</td>
-      <td>Iris-setosa</td>
     </tr>
     <tr>
       <th>4</th>
@@ -101,7 +145,6 @@ Perform following steps:
       <td>3.6</td>
       <td>1.4</td>
       <td>0.2</td>
-      <td>Iris-setosa</td>
     </tr>
   </tbody>
 </table>
@@ -135,10 +178,12 @@ Now we can take our feature set `X`  and standardize it using `StandardScalar` m
 
 ```python
 # Standardize the features
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
 
-
+df_scaled = pd.DataFrame(X_scaled, columns=columns)
 # Your code here 
-
+df_scaled.head()
 
 ```
 
@@ -163,10 +208,10 @@ Now we can take our feature set `X`  and standardize it using `StandardScalar` m
   <thead>
     <tr style="text-align: right;">
       <th></th>
-      <th>sepal length</th>
-      <th>sepal width</th>
-      <th>petal length</th>
-      <th>petal width</th>
+      <th>sepal length (cm)</th>
+      <th>sepal width (cm)</th>
+      <th>petal length (cm)</th>
+      <th>petal width (cm)</th>
     </tr>
   </thead>
   <tbody>
@@ -222,12 +267,24 @@ We shall now project the original data which is 4 dimensional into 2 dimensions.
 
 ```python
 # Run the PCA algorithm
+mypca = PCA(n_components=2)
 
 
 # Your code here 
-
-
+x_vecs = pca.fit_transform(X_scaled)
+x_vecs[:5]
 ```
+
+
+
+
+    array([[-2.26454173,  0.5057039 ],
+           [-2.0864255 , -0.65540473],
+           [-2.36795045, -0.31847731],
+           [-2.30419716, -0.57536771],
+           [-2.38877749,  0.6747674 ]])
+
+
 
 We can now save the results in a new dataframe and name the columns according the first/second component. 
 
@@ -236,10 +293,11 @@ We can now save the results in a new dataframe and name the columns according th
 
 ```python
 # Create a new dataset fro principal components 
-
+columns = ["PC1", "PC2", "target"]
+df_pca = pd.DataFrame(np.column_stack([x_vecs, y]), columns=columns)
 
 # Your code here 
-
+df_pca.head()
 
 ```
 
@@ -274,31 +332,31 @@ We can now save the results in a new dataframe and name the columns according th
       <th>0</th>
       <td>-2.264542</td>
       <td>0.505704</td>
-      <td>Iris-setosa</td>
+      <td>0.0</td>
     </tr>
     <tr>
       <th>1</th>
       <td>-2.086426</td>
       <td>-0.655405</td>
-      <td>Iris-setosa</td>
+      <td>0.0</td>
     </tr>
     <tr>
       <th>2</th>
       <td>-2.367950</td>
       <td>-0.318477</td>
-      <td>Iris-setosa</td>
+      <td>0.0</td>
     </tr>
     <tr>
       <th>3</th>
       <td>-2.304197</td>
       <td>-0.575368</td>
-      <td>Iris-setosa</td>
+      <td>0.0</td>
     </tr>
     <tr>
       <th>4</th>
       <td>-2.388777</td>
       <td>0.674767</td>
-      <td>Iris-setosa</td>
+      <td>0.0</td>
     </tr>
   </tbody>
 </table>
@@ -315,13 +373,22 @@ Using the target data, we can visualize the principal components according to th
 
 
 ```python
-# Principal Componets scatter plot
+# Principal Components scatter plot
+plt.figure(figsize=(10, 10))
+plt.scatter(df_pca.PC1, df_pca.PC2, c=df_pca.target, s=30, alpha=0.5)
+plt.xlabel("PC1")
+plt.ylabel("PC2")
+plt.show()
 
 
 # Your code here 
 
 
 ```
+
+
+![png](index_files/index_20_0.png)
+
 
 ## Explained Variance
 
@@ -418,7 +485,7 @@ visualizing decision boundary is good way to develop the intuition around a clas
 
 
 
-![png](index_files/index_26_1.png)
+![png](index_files/index_30_1.png)
 
 
 ## Level Up - Optional 
